@@ -1,88 +1,54 @@
 # DL- Developing a Recurrent Neural Network Model for Stock Prediction
 
+# NAME: HIBA NASREEN M
+# REGISTER NUMBER: 21222404017
+
 ## AIM
 To develop a Recurrent Neural Network (RNN) model for predicting stock prices using historical closing price data.
 
-## Problem Statement and Dataset
+## PROBLEM STATEMENT
 
+To develop a Recurrent Neural Network (RNN) model using PyTorch to predict future stock prices based on historical closing price data. The model uses the previous 60 days of stock prices as input and learns the patterns in the time-series data to predict the next closing price.
 
 ## DESIGN STEPS
-### STEP 1: 
-Load and normalize data, create sequences.
 
-### STEP 2:
-Convert data to tensors and set up DataLoader.
+STEP 1: Import the required libraries and load the training and testing stock price datasets using Pandas.
 
-### STEP 3:
-Define the RNN model architecture.
+STEP 2: Extract the Close Price values and normalize them using MinMaxScaler to scale the data between 0 and 1.
 
-### STEP 4:
-Summarize, compile with loss and optimizer.
+STEP 3: Create input-output sequences using a 60-day sequence length, where the previous 60 prices are used to predict the next price.
 
-### STEP 5:
-Train the model with loss tracking.
+STEP 4: Convert the sequences into PyTorch tensors and create a DataLoader for training the RNN model.
 
-### STEP 6:
-Predict on test data, plot actual vs. predicted prices.
+STEP 5: Build and train a two-layer RNN with 64 hidden units using MSE Loss and the Adam optimizer for 20 epochs.
+
+STEP 6: Evaluate the trained model on the test data, convert predictions back to the original price scale, and plot the actual vs. predicted stock prices.
 
 ## PROGRAM
 
-### Name: Hiba Nasreen M
-
-### Register Number: 212224040117
-
-```py
+```c
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
-from torchinfo import summary
 from torch.utils.data import DataLoader, TensorDataset
-
-## Step 1: Load and Preprocess Data
-# Load training and test datasets
-df_train = pd.read_csv('/content/drive/MyDrive/trainset.csv')
-df_test = pd.read_csv('/content/drive/MyDrive/testset.csv')
-
-# Use closing prices
+df_train = pd.read_csv("C:/Users/admin/OneDrive/Documents/DL/trainset.csv")
+df_test = pd.read_csv("C:/Users/admin/OneDrive/Documents/DL/testset.csv")
 train_prices = df_train['Close'].values.reshape(-1, 1)
 test_prices = df_test['Close'].values.reshape(-1, 1)
-
-# Normalize the data based on training set only
 scaler = MinMaxScaler()
 scaled_train = scaler.fit_transform(train_prices)
 scaled_test = scaler.transform(test_prices)
-
-# Create sequences
-def create_sequences(data, seq_length):
-    x = []
-    y = []
-    for i in range(len(data) - seq_length):
-        x.append(data[i:i+seq_length])
-        y.append(data[i+seq_length])
-    return np.array(x), np.array(y)
-
 seq_length = 60
 x_train, y_train = create_sequences(scaled_train, seq_length)
 x_test, y_test = create_sequences(scaled_test, seq_length)
-
-
 x_train.shape, y_train.shape, x_test.shape, y_test.shape
-
-# Convert to PyTorch tensors
 x_train_tensor = torch.tensor(x_train, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
 x_test_tensor = torch.tensor(x_test, dtype=torch.float32)
 y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
-
-
-# Create dataset and dataloader
-train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-
-## Step 2: Define RNN Model
 class RNNModel(nn.Module):
     def __init__(self, input_size=1,hidden_size=64,num_layers=2,output_size=1):
         super(RNNModel, self).__init__()
@@ -96,17 +62,11 @@ class RNNModel(nn.Module):
 model = RNNModel()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
-
 !pip install torchinfo
-
-# input_size = (batch_size, seq_len, input_size)
+from torchinfo import summary
 summary(model, input_size=(64, 60, 1))
-
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-
-## Step 3: Train the Model
 def train_model(model, train_loader, criterion, optimizer, epochs=20):
     train_losses = []
     model.train()
@@ -122,15 +82,18 @@ def train_model(model, train_loader, criterion, optimizer, epochs=20):
             total_loss += loss.item()
         train_losses.append(total_loss / len(train_loader))
         print(f"Epoch [{epoch+1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}")
-
-# --- Re-defining dependencies to make this cell self-contained --- 
-# Assuming df_train is already loaded from drive
-df_train = pd.read_csv('/content/drive/MyDrive/trainset.csv')
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import pandas as pd
+df_train = pd.read_csv("C:/Users/admin/OneDrive/Documents/DL/trainset.csv")
 train_prices = df_train['Close'].values.reshape(-1, 1)
-
 scaler = MinMaxScaler()
 scaled_train = scaler.fit_transform(train_prices)
-
 def create_sequences(data, seq_length):
     x = []
     y = []
@@ -141,13 +104,10 @@ def create_sequences(data, seq_length):
 
 seq_length = 60
 x_train, y_train = create_sequences(scaled_train, seq_length)
-
 x_train_tensor = torch.tensor(x_train, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
-
 train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-
 class RNNModel(nn.Module):
     def __init__(self, input_size=1,hidden_size=64,num_layers=2,output_size=1):
         super(RNNModel, self).__init__()
@@ -164,9 +124,6 @@ model = model.to(device)
 
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-# --- End of re-defining dependencies --- 
-# Re-define train_model locally to return train_losses
 def train_model(model, train_loader, criterion, optimizer, epochs=20):
     train_losses = []
     model.train()
@@ -183,33 +140,23 @@ def train_model(model, train_loader, criterion, optimizer, epochs=20):
         train_losses.append(total_loss / len(train_loader))
         print(f"Epoch [{epoch+1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}")
     return train_losses
-
-# Call the (redefined) train_model function to get the losses
 train_losses = train_model(model, train_loader, criterion, optimizer, epochs=20)
-
-# Plot training loss
-print('Name: HIBA NASREEN M')
-print('Register Number:212224040117')
+print('Name: PRASIDHA A')
+print('Register Number:212224230204')
 plt.plot(train_losses, label='Training Loss')
 plt.xlabel('Epoch')
 plt.ylabel('MSE Loss')
 plt.title('Training Loss Over Epochs')
 plt.legend()
 plt.show()
-
-## Step 4: Make Predictions on Test Set
 model.eval()
 with torch.no_grad():
     predicted = model(x_test_tensor.to(device)).cpu().numpy()
     actual = y_test_tensor.cpu().numpy()
-
-# Inverse transform the predictions and actual values
 predicted_prices = scaler.inverse_transform(predicted)
 actual_prices = scaler.inverse_transform(actual)
-
-# Plot the predictions vs actual prices
-print('Name: HIBA NASREEN M')
-print('Register Number:212224040117')
+print('Name: PRASIDHA A')
+print('Register Number:212224230204')
 plt.figure(figsize=(10, 6))
 plt.plot(actual_prices, label='Actual Price')
 plt.plot(predicted_prices, label='Predicted Price')
@@ -227,18 +174,15 @@ print(f'Actual Price: {actual_prices[-1]}')
 
 ## Training Loss Over Epochs Plot
 
-<img width="340" height="517" alt="image" src="https://github.com/user-attachments/assets/00fa76ad-d1e3-442e-b68a-4b317e972809" />
-
+<img width="735" height="586" alt="image" src="https://github.com/user-attachments/assets/64f9b2c7-08fa-4124-aebf-f452e816d257" />
 
 ## True Stock Price, Predicted Stock Price vs time
 
-<img width="810" height="627" alt="image" src="https://github.com/user-attachments/assets/f22600f3-d5d8-4870-9d27-66c5d87a5c70" />
-
+<img width="1091" height="706" alt="image" src="https://github.com/user-attachments/assets/8d5158ee-60f1-4571-9fc8-5afa50358ca6" />
 
 ### Predictions
 
-<img width="880" height="556" alt="image" src="https://github.com/user-attachments/assets/4b48e182-5160-45f2-8632-457bd599c038" />
-
+<img width="286" height="73" alt="image" src="https://github.com/user-attachments/assets/9236aa10-788f-4361-808e-b7fbc8798f59" />
 
 ## RESULT
-Thus, a Recurrent Neural Network (RNN) model for predicting stock prices using historical closing price data has been developed successfully.
+The RNN model was successfully trained and used to predict stock prices. The predicted prices were compared with the actual prices using a graph.
